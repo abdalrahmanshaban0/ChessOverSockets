@@ -1,29 +1,28 @@
 # ChessOverSockets
 ### 1. Wanna play?<br>
-    1-Invite a friend using his IP and port number<br>
-    (shoud be open and the friend accept your invitation)<br>
-    2-Listen to a friend <br>
-    (bind socket to an interface with IP, specify a port number)<br>
-    (Who listens will play first with white color)<br>
-    3-History (Not implemented yet)<br>
-    (view past mathches results)<br>
-    option: play the match <br>
+    1-Invite a friend using his IP and port number
+    (shoud be open and the friend accept your invitation)
+    2-Listen to a friend
+    (bind socket to an interface with IP, specify a port number)
+    (Who listens will play first with white color)
+    3-History (Not implemented yet)
+    (view past mathches results)
+    option: play the match
 ### 2. Init pieces and board<br>
-There are 2x16 pieces on the board we init there types and locations<br>
-
+    There are 2x16 pieces on the board we init there types and locations
 ### 3. Check status of the game<br>
 In the start of each play check the king status:<br>
-    1-other player lose?<br>
-    I win and break<br>
-    2-Other player draw?<br>
-    I draw and break<br>
-    3-King's spot is not safe?<br>
-    can move?    ->  checkmate<br>
-    can't move? <br>
-    try for each of you pieces every available move<br>
-    and check if the king will be safe or not.<br>
-    found a move ?     -> checkmate<br>
-    no such move ?     -> lose, send lose and break<br>
+- other player lose?<br>
+- I win and break<br>
+- Other player draw?<br>
+    - I draw and break<br>
+- King's spot is not safe?<br>
+    - can move?    ->  checkmate<br>
+    - can't move? <br>
+        -try for each of you pieces every available move<br>
+        -and check if the king will be safe or not.<br>
+    - found a move ?     -> checkmate<br>
+    - no such move ?     -> lose, send lose and break<br>
 ### 4-King's spot is safe?<br>
     can move?    ->  good<br>
     can't move?<br>
