@@ -1,4 +1,3 @@
-                                !-(((ChessOverSockets V0.1)))-!
 1- Wanna play?
     1-Invite a friend using his IP and port number
     (shoud be open and the friend accept your invitation)
