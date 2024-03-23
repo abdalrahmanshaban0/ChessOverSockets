@@ -1,50 +1,49 @@
 # ChessOverSockets
 ### 1. Wanna play?<br>
-- Invite a friend using his IP and port number<br>
-(shoud be open and the friend accept your invitation)<br>
-- Listen to a friend <br>
-(bind socket to an interface with IP, specify a port number)<br>
-(Who listens will play first with white color)<br>
-- History (Not implemented yet)<br>
-(view past mathches results)<br>
-option: play the match <br>
-
-2-Init pieces and board<br>
+    1-Invite a friend using his IP and port number<br>
+    (shoud be open and the friend accept your invitation)<br>
+    2-Listen to a friend <br>
+    (bind socket to an interface with IP, specify a port number)<br>
+    (Who listens will play first with white color)<br>
+    3-History (Not implemented yet)<br>
+    (view past mathches results)<br>
+    option: play the match <br>
+### 2. Init pieces and board<br>
 There are 2x16 pieces on the board we init there types and locations<br>
 
-3-Check status of the game<br>
+### 3. Check status of the game<br>
 In the start of each play check the king status:<br>
-1-other player lose?<br>
-I win and break<br>
-2-Other player draw?<br>
-I draw and break<br>
-3-King's spot is not safe?<br>
-can move?    ->  checkmate<br>
-can't move? <br>
-try for each of you pieces every available move<br>
-and check if the king will be safe or not.<br>
-found a move ?     -> checkmate<br>
-no such move ?     -> lose, send lose and break<br>
-4-King's spot is safe?<br>
-can move?    ->  good<br>
-can't move?<br>
-no other pieces can move ?  -> draw (stalemate), send draw and break<br>
+    1-other player lose?<br>
+    I win and break<br>
+    2-Other player draw?<br>
+    I draw and break<br>
+    3-King's spot is not safe?<br>
+    can move?    ->  checkmate<br>
+    can't move? <br>
+    try for each of you pieces every available move<br>
+    and check if the king will be safe or not.<br>
+    found a move ?     -> checkmate<br>
+    no such move ?     -> lose, send lose and break<br>
+### 4-King's spot is safe?<br>
+    can move?    ->  good<br>
+    can't move?<br>
+        no other pieces can move ?  -> draw (stalemate), send draw and break<br>
 4- Is it my turn?<br>
-YES?   do(A)<br>
-NO?    do (B)<br>
+    YES?   do(A)<br>
+    NO?    do (B)<br>
 
 (A) Make a move<br>
 How to check a move if it's valid?<br>
-1-Not out of bound of the chess board.<br>
-2-Not an empty spot.<br>
-3-Not moving enemy's piece<br>
-5-Castling<br>
-valid ? <br>
-do castling and update board<br>
-not valid ? <br>
-print "not valid"<br>
-6-Not attacking allied piece.<br>
-7-Valid piece range<br>
+    1-Not out of bound of the chess board.<br>
+    2-Not an empty spot.<br>
+    3-Not moving enemy's piece<br>
+    4-Castling<br>
+        valid ? <br>
+            do castling and update board<br>
+        not valid ? <br>
+            print "not valid"<br>
+    5-Not attacking allied piece.<br>
+    6-Valid piece range<br>
 
 valid ? <br>
 try to make the move<br>
