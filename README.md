@@ -19,8 +19,8 @@ In the start of each play check the king status:<br>
 - King's spot is not safe?<br>
     - can move?    ->  checkmate<br>
     - can't move? <br>
-        -try for each of you pieces every available move<br>
-        -and check if the king will be safe or not.<br>
+        - try for each of you pieces every available move<br>
+        - and check if the king will be safe or not.<br>
     - found a move ?     -> checkmate<br>
     - no such move ?     -> lose, send lose and break<br>
 ### 4-King's spot is safe?<br>
