@@ -1,89 +1,86 @@
-1- Wanna play?
-    1-Invite a friend using his IP and port number
-    (shoud be open and the friend accept your invitation)
-    2-Listen to a friend 
-    (bind socket to an interface with IP, specify a port number)
-    (Who listens will play first with white color)
-    3-History (Not implemented yet)
-    (view past mathches results)
-        option: play the match
-----------------------------
-2-Init pieces and board
-    There are 2x16 pieces on the board we init there types and locations
----------------------------
-3-Check status of the game
-    In the start of each play check the king status:
-    1-other player lose?
-        I win and break
-    2-Other player draw?
-        I draw and break
-    3-King's spot is not safe?
-        can move?    ->  checkmate
-        can't move? 
-            try for each of you pieces every available move
-            and check if the king will be safe or not.
-            found a move ?     -> checkmate
-            no such move ?     -> lose, send lose and break
-    4-King's spot is safe?
-        can move?    ->  good
-        can't move?
-            no other pieces can move ?  -> draw (stalemate), send draw and break
----------------------------
-4- Is it my turn?
-    YES?   do(A)
-    NO?    do (B)
+Wanna play?<br>
+1-Invite a friend using his IP and port number<br>
+(shoud be open and the friend accept your invitation)<br>
+2-Listen to a friend <br>
+(bind socket to an interface with IP, specify a port number)<br>
+(Who listens will play first with white color)<br>
+3-History (Not implemented yet)<br>
+(view past mathches results)<br>
+option: play the match <br>
 
-(A) Make a move
-    How to check a move if it's valid?
-        1-Not out of bound of the chess board.
-        2-Not an empty spot.
-        3-Not moving enemy's piece
-        5-Castling
-            valid ? 
-                do castling and update board
-            not valid ? 
-                print "not valid"
-        6-Not attacking allied piece.
-        7-Valid piece range
+2-Init pieces and board<br>
+There are 2x16 pieces on the board we init there types and locations<br>
 
-    valid ? 
-        try to make the move
-    is king safe ?
-        No ? 
-            roll back the move and print "not valid"
-            goto(4)
-        Yes ? 
-            update the board with the valid move, send the move and change the turn.
-            goto(4)
+3-Check status of the game<br>
+In the start of each play check the king status:<br>
+1-other player lose?<br>
+I win and break<br>
+2-Other player draw?<br>
+I draw and break<br>
+3-King's spot is not safe?<br>
+can move?    ->  checkmate<br>
+can't move? <br>
+try for each of you pieces every available move<br>
+and check if the king will be safe or not.<br>
+found a move ?     -> checkmate<br>
+no such move ?     -> lose, send lose and break<br>
+4-King's spot is safe?<br>
+can move?    ->  good<br>
+can't move?<br>
+no other pieces can move ?  -> draw (stalemate), send draw and break<br>
+4- Is it my turn?<br>
+YES?   do(A)<br>
+NO?    do (B)<br>
 
-(B) recive other player's reply 
-    recive move
-    move is -1 ? 
-        other player lose (I win)
-    move is -2
-        other player draw (I draw)
-    else
-        update the board and change the turn
-        goto(4)
-        
---------------------------
-History feature (not implemented yet)
-5-At end of every game (destructor)
-    save the match
-        print date, guest name and moves to a file
+(A) Make a move<br>
+How to check a move if it's valid?<br>
+1-Not out of bound of the chess board.<br>
+2-Not an empty spot.<br>
+3-Not moving enemy's piece<br>
+5-Castling<br>
+valid ? <br>
+do castling and update board<br>
+not valid ? <br>
+print "not valid"<br>
+6-Not attacking allied piece.<br>
+7-Valid piece range<br>
 
+valid ? <br>
+try to make the move<br>
+is king safe ?<br>
+No ? <br>
+roll back the move and print "not valid"<br>
+goto(4)<br>
+Yes ? <br>
+    update the board with the valid move, send the move and change the turn.<br>
+goto(4)<br>
+(B) recive other player's reply<br> 
 
-How to contribute:
-1- This game doesn't detect all draw cases (just stalemate)
-        Any PR handling a game draw rule will be reviewed and accepted
-2- Any special moves (rather than pawn promotion and castling)
-    -Any Chess rules not coverd-
-        inclue the rule reference in your PR
+recive move<br> 
+    move is -1 ? <br> 
+other player lose (I win)<br> 
+    move is -2<br> 
+other player draw (I draw)<br> 
+    else<br> 
+    update the board and change the turn<br> 
+    goto(4)<br> 
 
-Future features (Not accepting PRs):
-1-History
-2-GUI
-3-chat (Threading)
-4-Timer (Threading)
-5-Chess agent (API)
-6-Chess engine (AI)
+History feature (not implemented yet)<br>
+5-At end of every game (destructor)<br>
+save the match<br>
+print date, guest name and moves to a file<br>
+
+How to contribute:<br>
+1- This game doesn't detect all draw cases (just stalemate)<br>
+    Any PR handling a game draw rule will be reviewed and accepted<br>
+2- Any special moves (rather than pawn promotion and castling)<br>
+    -Any Chess rules not coverd-<br>
+    inclue the rule reference in your PR<br>
+
+Future features (Not accepting PRs):<br>
+    1-History<br>
+    2-GUI<br>
+    3-chat (Threading)<br>
+    4-Timer (Threading)<br>
+    5-Chess agent (API)<br>
+    6-Chess engine (AI)<br>
