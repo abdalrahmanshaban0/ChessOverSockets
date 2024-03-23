@@ -1,19 +1,19 @@
 # ChessOverSockets
 ### 1. Wanna play?<br>
-    1-Invite a friend using his IP and port number
-    (shoud be open and the friend accept your invitation)
-    2-Listen to a friend
+1. Invite a friend using his IP and port number
+   (shoud be open and the friend accept your invitation)
+2. Listen to a friend
     (bind socket to an interface with IP, specify a port number)
     (Who listens will play first with white color)
-    3-History (Not implemented yet)
+3. History (Not implemented yet)
     (view past mathches results)
     option: play the match
 ### 2. Init pieces and board<br>
-    There are 2x16 pieces on the board we init there types and locations
+There are 2x16 pieces on the board we init there types and locations
 ### 3. Check status of the game<br>
 In the start of each play check the king status:<br>
 - other player lose?<br>
-- I win and break<br>
+    - I win and break<br>
 - Other player draw?<br>
     - I draw and break<br>
 - King's spot is not safe?<br>
