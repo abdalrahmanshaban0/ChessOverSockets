@@ -1,11 +1,11 @@
 # ChessOverSockets
-Wanna play?<br>
-1-Invite a friend using his IP and port number<br>
+### 1.Wanna play?<br>
+- Invite a friend using his IP and port number<br>
 (shoud be open and the friend accept your invitation)<br>
-2-Listen to a friend <br>
+- Listen to a friend <br>
 (bind socket to an interface with IP, specify a port number)<br>
 (Who listens will play first with white color)<br>
-3-History (Not implemented yet)<br>
+- History (Not implemented yet)<br>
 (view past mathches results)<br>
 option: play the match <br>
 
