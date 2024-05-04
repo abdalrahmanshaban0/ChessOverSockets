@@ -1,5 +1,8 @@
 # ChessOverSockets
-![COSff_1 1 2](https://github.com/abdalrahmanshaban0/ChessOverSockets/assets/126330281/63b35377-cfd7-48e9-962e-f19840399614)
+![image](https://github.com/abdalrahmanshaban0/ChessOverSockets/assets/126330281/d6a99fb2-f9f4-4dd4-93e5-233ef582f59a)
+
+![image](https://github.com/abdalrahmanshaban0/ChessOverSockets/assets/126330281/73198e7f-a210-4168-a4a3-c6759330d747)
+
 ### 1. Wanna play?<br>
 1. Invite a friend using his IP and port number<br>
    (shoud be open and the friend accept your invitation)
