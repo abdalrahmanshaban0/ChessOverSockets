@@ -55,11 +55,10 @@ class Chess{
         spot kingspt;
         king_status mode;
         bool castling;
-        
-    protected:
         color player;   //Who invites gets white the other gets black
-        static chess_piece* board[n][n];    //Each spot contains a pointer to piece
     public:
+        static chess_piece* board[n][n];    //Each spot contains a pointer to piece
+        
         Chess() : mode(good), castling(1), kingspt({7,4}) {
             memset(killed, 0, sizeof(killed));
             memset(died, 0, sizeof(died));
@@ -74,7 +73,6 @@ class Chess{
         void draw_board();   //clears console and prints current board 
 
         king_status update_status();
-
         bool make_move(spot, spot);
         bool check_move(spot, spot);
         bool do_castling(spot);
@@ -99,44 +97,44 @@ class chess_piece {
         virtual bool can_reach(spot, spot) = 0;
 };
 
-class Pawn : public chess_piece, private Chess{
+class Pawn : public chess_piece {
     public:
-        Pawn(color clr) : chess_piece(clr), Chess(0) { }
+        Pawn(color clr) : chess_piece(clr){ }
         void print_piece();
         type get_type();
         bool can_reach(spot, spot);
 };
-class Rook : public chess_piece, private Chess{
+class Rook : public chess_piece {
     public:
-        Rook(color clr) : chess_piece(clr), Chess(0) { }
+        Rook(color clr) : chess_piece(clr) { }
         void print_piece();
         type get_type();
         bool can_reach(spot, spot);
 };
-class Knight : public chess_piece, private Chess {
+class Knight : public chess_piece {
     public:
-        Knight(color clr) : chess_piece(clr), Chess(0) { }
+        Knight(color clr) : chess_piece(clr) { }
         void print_piece();
         type get_type();
         bool can_reach(spot, spot);
 };
-class Bishop : public chess_piece, private Chess {
+class Bishop : public chess_piece {
     public:
-        Bishop(color clr) : chess_piece(clr), Chess(0) { }
+        Bishop(color clr) : chess_piece(clr) { }
         void print_piece();
         type get_type();
         bool can_reach(spot, spot);
 };
-class King : public chess_piece, private Chess {
+class King : public chess_piece {
     public:
-        King(color clr) : chess_piece(clr), Chess(0) { }
+        King(color clr) : chess_piece(clr) { }
         void print_piece();
         type get_type();
         bool can_reach(spot, spot);
 };
-class Queen : public chess_piece, private Chess {
+class Queen : public chess_piece {
     public:
-        Queen(color clr) : chess_piece(clr), Chess(0) { }
+        Queen(color clr) : chess_piece(clr) { }
         void print_piece();
         type get_type();
         bool can_reach(spot, spot);

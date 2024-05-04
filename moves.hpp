@@ -3,7 +3,7 @@ color chess_piece::get_color() {
     return clr;
 }
 bool Pawn::can_reach(spot from, spot to) {
-    if(board[to.x][to.y] && board[to.x][to.y]->get_color() == !player){ //attacking
+    if(Chess::board[to.x][to.y] && Chess::board[to.x][to.y]->get_color() == !Chess::board[from.x][from.y]->get_color()){ //attacking
         if(from.x-to.x == 1 && abs(from.y-to.y) == 1) return 1;
     }
     else{  //moving
@@ -25,13 +25,13 @@ bool Rook::can_reach(spot from, spot to){
     if(from.y == to.y){ //up and down
         if(from.x > to.x){ //up
             for(int i = from.x-1; i > to.x; i--){
-                if(board[i][from.y]) return 0;
+                if(Chess::board[i][from.y]) return 0;
             }
             return 1;
         }
         else if(from.x < to.x){ //down
             for(int i = from.x+1; i < to.x; i++){
-                if(board[i][from.y]) return 0;
+                if(Chess::board[i][from.y]) return 0;
             }
             return 1;
         }
@@ -39,13 +39,13 @@ bool Rook::can_reach(spot from, spot to){
     else if(from.x == to.x){ //left and right
         if(from.y < to.y){ //right
             for(int i = from.y+1; i < to.y; i++){
-                if(board[from.x][i]) return 0;
+                if(Chess::board[from.x][i]) return 0;
             }
             return 1;
         }
         else if(from.y > to.y){ //left
             for(int i = from.y-1; i > to.y; i--){
-                if(board[from.x][i]) return 0;
+                if(Chess::board[from.x][i]) return 0;
             }
             return 1;
         }
@@ -63,25 +63,25 @@ bool Bishop::can_reach(spot from, spot to){
     if(abs(from.x-to.x) != abs(from.y-to.y)) return 0;
     if(from.x > to.x && from.y < to.y){ //dia_up_right
         for(int i = from.x-1, j = from.y+1; i > to.x && j < to.y; i--, j++){
-            if(board[i][j]) return 0;
+            if(Chess::board[i][j]) return 0;
         }
         return 1;
     }
     else if(from.x > to.x && from.y > to.y){ //dia_up_left
         for(int i = from.x-1, j = from.y-1; i > to.x && j > to.y; i--, j--){
-            if(board[i][j]) return 0;
+            if(Chess::board[i][j]) return 0;
         }
         return 1;
     }
     else if(from.x < to.x && from.y < to.y){ //dia_down_right
         for(int i = from.x+1, j = from.y+1; i < to.x && j < to.y; i++, j++){
-            if(board[i][j]) return 0;
+            if(Chess::board[i][j]) return 0;
         }
         return 1;
     }
     else if(from.x < to.x && from.y > to.y){ //dia_down_left
         for(int i = from.x+1, j = from.y-1; i < to.x && j > to.y; i++, j--){
-            if(board[i][j]) return 0;
+            if(Chess::board[i][j]) return 0;
         }
         return 1;
     }
