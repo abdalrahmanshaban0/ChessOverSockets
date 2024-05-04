@@ -63,7 +63,6 @@ class Chess{
             memset(killed, 0, sizeof(killed));
             memset(died, 0, sizeof(died));
         }
-        Chess(int dummyArg) { }
         //Networking (2 ways for starting new game)
         int Invite_guest(int, char*);
         void Search_for_players(int, char*);
