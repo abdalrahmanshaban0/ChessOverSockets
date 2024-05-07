@@ -40,20 +40,22 @@ void Chess::init_board(){
     board[0][3] = new Queen(enemy);
     board[0][4] = new King(enemy);
 }
-
-void Chess::draw_board(){
-    system("clear");
-    cout << guest_name << ' ';
+void Chess::Print_Killed(color p){
     for(int i = 0; i < 6; i++){
-        if(died[i] && i == 0){
-            cout << died[i] << 'x' << icons[player][i] << ' ';
+        if(chess_piece::killed[p][i] && i == 0){
+            cout << chess_piece::killed[p][i] << 'x' << icons[p][i] << ' ';
         }
         else{
-            int tmp  = died[i];
+            int tmp  = chess_piece::killed[p][i];
             while(tmp--)
                 cout << icons[player][i] << ' ';
         }
     }
+}
+void Chess::draw_board(){
+    system("clear");
+    cout << guest_name << ' ';
+    Print_Killed(player);
     cout << endl;
     for(int i = 0; i < n; i++){
         for(int j = 0; j < n; j++){
@@ -79,17 +81,7 @@ void Chess::draw_board(){
     cout << "    ";
     for(char ch = 'a'; ch <= 'h'; ch++) cout << ch << "   "; cout << endl;
     cout << player_name << ' ';
-    color enemy = color(!player);
-    for(int i = 0; i < 6; i++){
-        if(killed[i] && i == 0){
-            cout << killed[i] << 'x' << icons[enemy][i] << ' ';
-        }
-        else{
-            int tmp = killed[i];
-            while(tmp--)
-                cout << icons[enemy][i] << ' ';
-        }
-    }
+    Print_Killed(color(!player)); 
     cout << endl;
 }
 //*******************************
@@ -103,9 +95,10 @@ bool Chess::make_move(spot from, spot to){
     }
     return 0;
 }
+
 void Chess::update_board(spot from, spot to){
     if(board[to.x][to.y] && board[to.x][to.y]->get_color() == !player){
-        killed[board[to.x][to.y]->get_type()]++;
+        chess_piece::killed[!player][board[to.x][to.y]->get_type()]++;
         delete board[to.x][to.y];
         board[to.x][to.y] = NULL;
     }
@@ -275,7 +268,7 @@ void Chess::recvmv(){
     }
 
     if(board[to.x][to.y] && board[to.x][to.y]->get_color() == player){ //my piece died!
-        died[board[to.x][to.y]->get_type()]++;
+        chess_piece::killed[player][board[to.x][to.y]->get_type()]++;
         delete board[to.x][to.y];
         board[to.x][to.y] = NULL;
     }

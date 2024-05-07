@@ -50,8 +50,6 @@ class chess_piece;
 class Chess{
     private:
         int gstFD;  //guest player socket file descriptor
-        int killed[6];
-        int died[6];      
         spot kingspt;
         king_status mode;
         bool castling;
@@ -59,10 +57,7 @@ class Chess{
     public:
         static chess_piece* board[n][n];    //Each spot contains a pointer to piece
         
-        Chess() : mode(good), castling(1), kingspt({7,4}) {
-            memset(killed, 0, sizeof(killed));
-            memset(died, 0, sizeof(died));
-        }
+        Chess() : mode(good), castling(1), kingspt({7,4}) { }
         //Networking (2 ways for starting new game)
         int Invite_guest(int, char*);
         void Search_for_players(int, char*);
@@ -70,6 +65,7 @@ class Chess{
         void init_board();   //puts and initializes players pieces on the board
         void CleanUP();
         void draw_board();   //clears console and prints current board 
+        void Print_Killed(color);
 
         king_status update_status();
         bool make_move(spot, spot);
@@ -88,6 +84,7 @@ class chess_piece {
     protected:
         color clr;
     public:
+        static int killed[2][6];
         chess_piece(color c) : clr(c) { }
         virtual ~chess_piece() { }
         color get_color();
@@ -95,6 +92,7 @@ class chess_piece {
         virtual type get_type() = 0;
         virtual bool can_reach(spot, spot) = 0;
 };
+int chess_piece::killed[2][6] = {0};
 
 class Pawn : public chess_piece {
     public:
