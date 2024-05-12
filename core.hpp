@@ -1,4 +1,4 @@
-#include "moves.hpp"
+#include "pieces.hpp"
 int Chess::Invite_guest(int gst_port, char* gst_IP){
     player = white;
     Networking client(gst_port, gst_IP);
@@ -107,6 +107,9 @@ void Chess::update_board(spot from, spot to){
         castling = 0;
         kingspt = to;
     }
+    if(board[to.x][to.y]->get_type() == rook){
+        castling = 0;
+    }
     else if(to.x == 0 && board[to.x][to.y]->get_type() == pawn){
         delete board[to.x][to.y];
         board[to.x][to.y] = new Queen(player);
@@ -124,7 +127,7 @@ bool Chess::check_move(spot from, spot to){
     //check castling
     bool sgn = 0;
     if(from.x == kingspt.x && from.y == kingspt.y && board[to.x][to.y] && board[to.x][to.y]->get_type() == rook){
-        if(!castling) return 0;
+        if(!castling || mode == checkmate) return 0;
         return 1;
     }
     //attacking allied piece
@@ -152,11 +155,13 @@ bool Chess::check_move(spot from, spot to){
     return ok;
 }
 bool Chess::do_castling(spot to){
-    if(!castling) return 0;
     if(kingspt.x == 7 && kingspt.y == 4 && (to.x == 7 && (to.y == 0 || to.y == 7))){
         if(kingspt.y < to.y){
             for(int j = kingspt.y+1; j < to.y; j++){
                 if(board[7][j]) return 0;
+            }
+            for(int j = kingspt.y+1; j < to.y; j++){
+                if(!safe_spot({7, j})) return 0;
             }
             swap(board[kingspt.x][kingspt.y], board[7][6]);
             swap(board[to.x][to.y], board[7][5]);
@@ -171,6 +176,9 @@ bool Chess::do_castling(spot to){
         else{
             for(int j = kingspt.y-1; j > to.y; j--){
                 if(board[7][j]) return 0;
+            }
+            for(int j = kingspt.y-1; j > to.y; j--){
+                if(!safe_spot({7, j})) return 0;
             }
             swap(board[kingspt.x][kingspt.y], board[7][2]);
             swap(board[to.x][to.y], board[7][3]);
@@ -208,7 +216,6 @@ king_status Chess::update_status(){
     bool any_piece_move = can_move();
     if(!safe_spot(kingspt)){
         if(any_piece_move) { 
-            castling = 0;
             return mode = checkmate;
         }
         CleanUP();
