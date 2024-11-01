@@ -1,4 +1,13 @@
-#include "pieces.hpp"
+#include "../include/network_stuff.hpp"
+#include "../include/core.hpp"
+#include<iostream>
+
+using namespace std;
+chess_piece* Chess::board[n][n] = {nullptr};
+
+extern char player_name[1024];
+extern char guest_name[1024];
+
 int Chess::Invite_guest(int gst_port, char* gst_IP){
     player = white;
     Networking client(gst_port, gst_IP);

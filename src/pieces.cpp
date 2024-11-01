@@ -1,4 +1,11 @@
-#include "catalog.hpp"
+#include "../include/core.hpp"
+#include <cstdlib>
+#include <iostream>
+using namespace std;
+
+
+int chess_piece::killed[2][6] = {0};
+
 color chess_piece::get_color() {
     return clr;
 }

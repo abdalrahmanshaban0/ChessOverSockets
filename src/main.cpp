@@ -1,5 +1,7 @@
-#include "core.hpp"
-#include "network_stuff.hpp"
+#include "../include/core.hpp"
+#include "../include/network_stuff.hpp"
+#include<iostream>
+using namespace std;
 
 void Print_ASKII_Art(){
             cout <<
@@ -20,6 +22,9 @@ void Print_ASKII_Art(){
 "  ____) | (_) | (__|   <  __/ |_\\__ \\\n" <<
 " |_____/ \\___/ \\___|_|\\_\\___|\\__|___/\n";
 }
+
+char player_name[1024];
+char guest_name[1024];
 
 int main(){
     Print_ASKII_Art();

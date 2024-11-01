@@ -1,3 +1,10 @@
+#include "../include/network_stuff.hpp"
+#include <iostream>
+using namespace std;
+
+extern char player_name[1024];
+extern char guest_name[1024];
+
 int Networking::Inv(){
     //sending connection request 
     int ok_connect = connect(sktFD, (sockaddr*) &addr, sizeof(addr));
