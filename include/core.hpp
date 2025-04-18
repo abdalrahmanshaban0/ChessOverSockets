@@ -20,8 +20,8 @@ class Chess{
         
         Chess() : mode(good), castling(1), kingspt({7,4}) { }
         //Networking (2 ways for starting new game)
-        int Invite_guest(int, char*);
-        void Search_for_players(int, char*);
+        int Invite_guest(char*);
+        void Search_for_players();
 
         void init_board();   //puts and initializes players pieces on the board
         void CleanUP();
