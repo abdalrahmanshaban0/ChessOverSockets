@@ -8,6 +8,8 @@ chess_piece *Chess::board[n][n] = {nullptr};
 extern char player_name[1024];
 extern char guest_name[1024];
 
+int Chess::getSocket() { return gstFD; }
+
 int Chess::Invite_guest(char *gst_IP) {
   player = white;
   in_addr_t gstIP;
@@ -278,9 +280,9 @@ void Chess::sendmv(spot from, spot to) {
 }
 void Chess::recvmv() {
   spot from = {-1, -1}, to = {-1, -1};
-  recv(gstFD, &from, sizeof(from), 0);
-  recv(gstFD, &to, sizeof(to), 0);
-  if (from.x == -1) {
+  int bs1 = recv(gstFD, &from, sizeof(from), 0);
+  int bs2 = recv(gstFD, &to, sizeof(to), 0);
+  if (from.x == -1 || bs1 == 0 || bs2 == 0) {
     mode = win;
     return;
   } else if (from.x == -2) {

@@ -10,10 +10,10 @@ class Networking {
 private:
   int sktFD;
   sockaddr_in addr;
-  void listen();
   void bind();
-  void connect();
+  void listen();
   int accept();
+  void connect();
 
 public:
   Networking(in_addr_t IP);

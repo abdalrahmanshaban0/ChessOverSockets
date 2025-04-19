@@ -22,6 +22,9 @@ void Networking::bind() {
   // bind a socket
   if (::bind(sktFD, (sockaddr *)&addr, sizeof(addr)) == -1) {
     perror("Error binding a socket!\n");
+    if (errno == EADDRINUSE) {
+      cerr << "Wait some seconds and try again\n";
+    }
     close(sktFD);
     exit(1);
   }
