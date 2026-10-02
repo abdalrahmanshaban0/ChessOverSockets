@@ -27,6 +27,7 @@ private:
   bool is_en_passant(spot from, spot to);
   bool insufficient_material();
   std::string position_key();
+  bool is_pinned(int ax, int ay, spot king, color pinner);
 
 public:
   static chess_piece *board[n][n];

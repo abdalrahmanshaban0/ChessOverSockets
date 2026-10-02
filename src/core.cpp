@@ -349,23 +349,93 @@ void Chess::update_board(spot from, spot to) {
   }
 }
 
+// Returns true if the piece at (ax, ay) is pinned to its own king at
+// `king` by a piece of colour `pinner`. A pinned piece may only move
+// along the line between itself, its king, and the pinner.
+bool Chess::is_pinned(int ax, int ay, spot king, color pinner) {
+  if (ax == king.x && ay == king.y) return false;
+
+  int dx = ax - king.x;
+  int dy = ay - king.y;
+  int adx = abs(dx), ady = abs(dy);
+
+  // Must share a rank, file, or diagonal with the king.
+  bool on_line = (adx == 0 && ady > 0) || (ady == 0 && adx > 0) ||
+                 (adx == ady && adx > 0);
+  if (!on_line) return false;
+
+  int sx = (dx == 0) ? 0 : (dx > 0 ? 1 : -1);
+  int sy = (dy == 0) ? 0 : (dy > 0 ? 1 : -1);
+
+  // Nothing may sit between the king and the attacker.
+  int x = king.x + sx, y = king.y + sy;
+  while (x != ax || y != ay) {
+    if (board[x][y]) return false;
+    x += sx; y += sy;
+  }
+
+  // Walk past the attacker; the first piece we meet must be a pinner
+  // of the right colour and type for the line direction.
+  x = ax + sx; y = ay + sy;
+  while (x >= 0 && x < n && y >= 0 && y < n) {
+    if (board[x][y]) {
+      chess_piece *q = board[x][y];
+      if (q->get_color() != pinner) return false;
+      bool straight = (dx == 0 || dy == 0);
+      type t = q->get_type();
+      if (straight) return t == rook   || t == queen;
+      return             t == bishop || t == queen;
+    }
+    x += sx; y += sy;
+  }
+  return false;
+}
+
 bool Chess::safe_spot(spot spt) {
   if (spt.x < 0 || spt.x >= n || spt.y < 0 || spt.y >= n)
     return true;
 
   color enemy = color(!player);
+
+  // Locate the enemy king once.
+  spot ek = {-1, -1};
+  for (int a = 0; a < n && ek.x == -1; a++)
+    for (int b = 0; b < n; b++) {
+      chess_piece *q = board[a][b];
+      if (q && q->get_color() == enemy && q->get_type() == king) {
+        ek = {a, b};
+        break;
+      }
+    }
+
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < n; j++) {
       chess_piece *p = board[i][j];
-      if (!p || p->get_color() != enemy)
-        continue;
+      if (!p || p->get_color() != enemy) continue;
+
+      bool attacks;
       if (p->get_type() == pawn) {
-        if (spt.x - i == 1 && abs(spt.y - j) == 1)
-          return false;
+        attacks = (spt.x - i == 1 && abs(spt.y - j) == 1);
       } else {
-        if (p->can_reach({i, j}, spt))
-          return false;
+        attacks = p->can_reach({i, j}, spt);
       }
+      if (!attacks) continue;
+
+      // If the piece is pinned to its own king and the target square is
+      // off the pin line, the move would expose the enemy king — it is
+      // not a real threat.
+      if (p->get_type() != king && ek.x != -1 &&
+          is_pinned(i, j, ek, player)) {
+        int kdx = ek.x - i;
+        int kdy = ek.y - j;
+        int tdx = spt.x - i;
+        int tdy = spt.y - j;
+        // Cross product zero means collinear (on the pin line).
+        if (kdx * tdy != kdy * tdx)
+          continue;
+      }
+
+      return false;
     }
   }
   return true;
