@@ -1,6 +1,8 @@
 #include "../include/network_helper.hpp"
+#include <cerrno>
+#include <cstdlib>
 #include <iostream>
-#include <sys/socket.h>
+
 using namespace std;
 
 extern char player_name[1024];
@@ -13,46 +15,43 @@ Networking::Networking(in_addr_t IP) {
   addr.sin_addr.s_addr = IP;
 
   if ((sktFD = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-    perror("Error creating socket\n");
+    perror("Error creating socket");
     exit(1);
   }
 }
 
 void Networking::bind() {
-  // bind a socket
+  int opt = 1;
+  setsockopt(sktFD, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt));
   if (::bind(sktFD, (sockaddr *)&addr, sizeof(addr)) == -1) {
-    perror("Error binding a socket!\n");
-    if (errno == EADDRINUSE) {
+    perror("Error binding a socket!");
+    if (errno == EADDRINUSE)
       cerr << "Wait some seconds and try again\n";
-    }
     close(sktFD);
     exit(1);
   }
 }
 
 void Networking::listen() {
-  // listening to assigned socket
   if (::listen(sktFD, 5) == -1) {
-    perror("Error listening to the socket!\n");
+    perror("Error listening to the socket!");
     close(sktFD);
     exit(1);
   }
 }
 
 void Networking::connect() {
-  // sending connection request
-  if (::connect(sktFD, (sockaddr *)&addr, sizeof(addr))) {
-    perror("Error connecting to the address!\n");
+  if (::connect(sktFD, (sockaddr *)&addr, sizeof(addr)) == -1) {
+    perror("Error connecting to the address!");
     close(sktFD);
     exit(1);
   }
 }
 
 int Networking::accept() {
-  // Accept connection
   int clientFD = ::accept(sktFD, nullptr, nullptr);
   if (clientFD < 0) {
-    perror("Error accepting connection\n");
+    perror("Error accepting connection");
     close(sktFD);
     exit(1);
   }
@@ -61,72 +60,75 @@ int Networking::accept() {
 
 int Networking::playerInvite() {
   connect();
-  // send my name as invitation
-  int sz = sizeof(player_name);
-  int sent = 0;
-  while (sent < sz) {
-    sent += send(sktFD, player_name + sent, sz - sent, 0);
-    if (sent <= 0) {
-      perror("error sending player name\n");
-      return -1;
-    }
-  }
-  char ok;
-  // recieve the reply
-  recv(sktFD, &ok, sizeof(ok), 0);
-  if (ok == 'n') {
+
+  if (!send_all(sktFD, player_name, sizeof(player_name))) {
+    perror("error sending player name");
+    close(sktFD);
     return -1;
-  } else {
-    char guestName[1024];
-    // recieve player name
-    int totRevd = 0, sz = sizeof(guestName);
-    while (totRevd < sz) {
-      int rvd = recv(sktFD, guestName + totRevd, sizeof(guestName), 0);
-      if (rvd <= 0) {
-        perror("Error receiving guest name\n");
-        return -1;
-      }
-      totRevd += rvd;
-    }
-    strcpy(guest_name, guestName);
   }
+
+  char ok = 'n';
+  if (!recv_all(sktFD, &ok, sizeof(ok)) || ok == 'n') {
+    close(sktFD);
+    return -1;
+  }
+
+  char guestName[1024] = {0};
+  if (!recv_all(sktFD, guestName, sizeof(guestName))) {
+    perror("Error receiving guest name");
+    close(sktFD);
+    return -1;
+  }
+  strncpy(guest_name, guestName, sizeof(guest_name) - 1);
+  guest_name[sizeof(guest_name) - 1] = '\0';
   return sktFD;
 }
 
 int Networking::playerSearch() {
-  char guestName[1024] = {};
-  int clientFD = -1;
-  char rp;
   bind();
   listen();
+
+  char rp = 'n';
+  int clientFD = -1;
+  char guestName[1024];
+
   do {
-    cout << "Searching for players.." << endl;
+    cout << "Searching for players..." << endl;
     clientFD = accept();
-    // recieve player name
-    int totRevd = 0, sz = sizeof(guestName);
-    while (totRevd < sz) {
-      int rvd = recv(clientFD, guestName + totRevd, sizeof(guestName), 0);
-      if (rvd <= 0) {
-        perror("Error receiving guest name\n");
-        return -1;
-      }
-      totRevd += rvd;
+
+    memset(guestName, 0, sizeof(guestName));
+    if (!recv_all(clientFD, guestName, sizeof(guestName))) {
+      perror("Error receiving guest name");
+      close(clientFD);
+      clientFD = -1;
+      continue;
     }
-    cout << guestName << " is inviting you to play! " << "(y/n)" << endl;
+
+    cout << guestName << " is inviting you to play! (y/n): ";
     cin >> rp;
-    // send answer (accept and play or reject and continue searching)
-    send(clientFD, &rp, sizeof(rp), 0);
-  } while (rp == 'n');
-  strcpy(guest_name, guestName);
-  // send my name to the guest
-  int sz = sizeof(player_name);
-  int sent = 0;
-  while (sent < sz) {
-    sent += send(clientFD, player_name + sent, sz - sent, 0);
-    if (sent <= 0) {
-      perror("error sending player name\n");
-      return -1;
+
+    if (!send_all(clientFD, &rp, sizeof(rp))) {
+      close(clientFD);
+      clientFD = -1;
+      continue;
     }
+
+    if (rp == 'n') {
+      close(clientFD);
+      clientFD = -1;
+    }
+  } while (rp == 'n');
+
+  strncpy(guest_name, guestName, sizeof(guest_name) - 1);
+  guest_name[sizeof(guest_name) - 1] = '\0';
+
+  if (!send_all(clientFD, player_name, sizeof(player_name))) {
+    perror("error sending player name");
+    close(clientFD);
+    close(sktFD);
+    return -1;
   }
+
+  close(sktFD); // stop listening, keep the connected socket
   return clientFD;
 }
