@@ -1,4 +1,6 @@
 #include "../include/core.hpp"
+#include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <sys/select.h>
 #include <unistd.h>
@@ -27,104 +29,160 @@ void Print_ASKII_Art() {
        << " |_____/ \\___/ \\___|_|\\_\\___|\\__|___/\n";
 }
 
+static bool parse_square(const char *s, int &x, int &y) {
+  if (!s || strlen(s) < 2)
+    return false;
+  if (s[0] < 'a' || s[0] > 'h')
+    return false;
+  if (s[1] < '1' || s[1] > '8')
+    return false;
+  y = s[0] - 'a';
+  x = 8 - (s[1] - '0');
+  return true;
+}
+
 int main() {
   Print_ASKII_Art();
   cout << "Enter your name: ";
   cin >> player_name;
-  int op;
 
   while (true) {
-    cout << "1- Search for players\n2- Invite a player\nEnter (1,2): ";
-    cin >> op;
-    Chess game;
-    if (op == 1) {
-      game.Search_for_players();
-    } else if (op == 2) {
-      int chk = -1;
-      while (chk == -1) {
-        cout << "Enter the player IPv4: " << endl;
-        char IP[15];
-        cin >> IP;
-        chk = game.Invite_guest(IP);
-      }
-    } else {
+    int op = 0;
+    cout << "\n1- Search for players\n2- Invite a player\n0- Quit\nEnter (0,1,2): ";
+    if (!(cin >> op))
+      break;
+    if (op == 0)
+      break;
+    if (op != 1 && op != 2) {
       cout << "Enter a valid choice!" << endl;
       continue;
     }
-    game.init_board();
-    game.draw_board();
-    bool ord = (op == 1 ? 1 : 0);
-    bool f = 1;
 
-    while (true) {
-      fd_set readfds;
-      FD_ZERO(&readfds);
-      FD_SET(STDIN_FILENO, &readfds);
-      FD_SET(game.getSocket(), &readfds);
+    {
+      Chess game;
 
-      if (ord) {
-        if (f) {
-          king_status myst = game.update_status();
-          if (myst == lose) {
-            cout << "You lose!" << endl;
-            game.sendmv({-1, -1}, {-1, -1});
-            break;
-          } else if (myst == win) {
+      if (op == 1) {
+        game.Search_for_players();
+      } else {
+        int chk = -1;
+        while (chk == -1) {
+          cout << "Enter the player IPv4: ";
+          char IP[64];
+          if (!(cin >> IP))
+            return 0;
+          chk = game.Invite_guest(IP);
+        }
+      }
+      if (game.getSocket() < 0)
+        continue;
+
+      game.init_board();
+      game.draw_board();
+
+      // op == 2  -> we invited -> we play white -> we move first
+      bool my_turn = (op == 2);
+      bool need_status = true;
+
+      while (true) {
+        // ------------------------------------------------------------
+        // Opponent's turn
+        // ------------------------------------------------------------
+        if (!my_turn) {
+          cout << guest_name << "'s turn. Waiting..." << endl;
+          game.recvmv();
+
+          king_status m = game.getMode();
+          if (m == win) {
             cout << "You win!" << endl;
             break;
-          } else if (myst == draw) {
-            cout << "draw" << endl;
-            game.sendmv({-2, -2}, {-2, -2});
+          }
+          if (m == draw) {
+            cout << "Draw." << endl;
             break;
           }
-          f = 0;
-        }
-        cout << "Enter a move in form like: d2 d4" << endl;
-
-        int ret = select(game.getSocket() + 1, &readfds, NULL, NULL, NULL);
-        if (ret < 0) {
-          perror("select error\n");
-          close(game.getSocket());
-          exit(1);
-        } else if (ret == 0) {
-          cout << "Timeout, no input received." << endl;
+          game.draw_board();
+          my_turn = true;
+          need_status = true;
           continue;
         }
 
-        if (FD_ISSET(STDIN_FILENO, &readfds)) {
-          char from[3], to[3];
-          cin >> from >> to;
-          int y1 = from[0] - 'a', x1 = (8 - (from[1] - '0'));
-          int y2 = to[0] - 'a', x2 = (8 - (to[1] - '0'));
-          bool ok = game.make_move({x1, y1}, {x2, y2});
-          if (ok) {
-            f = 1;
-            game.draw_board();
-            game.sendmv({x1, y1}, {x2, y2});
-            ord = !ord;
-          } else {
-            cout << "Not a valid move!" << endl;
-          }
-        } else if (FD_ISSET(game.getSocket(), &readfds)) {
-          // Check if server closed the connection
-          char buffer[1024];
-          ssize_t bytes_read = read(game.getSocket(), buffer, sizeof(buffer));
-          if (bytes_read <= 0) {
-            cout << "You Win!\n" << endl;
+        // ------------------------------------------------------------
+        // Our turn: status check
+        // ------------------------------------------------------------
+        if (need_status) {
+          king_status st = game.update_status();
+          if (st == lose) {
+            cout << "Checkmate! You lose." << endl;
+            game.sendmv({-1, -1}, {-1, -1});
             break;
           }
-          game.recvmv();
-          game.draw_board();
-          ord = !ord;
+          if (st == draw) {
+            cout << "Draw." << endl;
+            game.sendmv({-2, -2}, {-2, -2});
+            break;
+          }
+          need_status = false;
         }
-      } else {
-        cout << guest_name << " turn" << endl;
-        if (FD_ISSET(game.getSocket(), &readfds)) {
+
+        cout << "Enter your move (e.g. d2 d4), or 'resign': ";
+        cout.flush();
+
+        fd_set rfds;
+        FD_ZERO(&rfds);
+        FD_SET(STDIN_FILENO, &rfds);
+        FD_SET(game.getSocket(), &rfds);
+        int mx = max(STDIN_FILENO, game.getSocket()) + 1;
+
+        if (select(mx, &rfds, nullptr, nullptr, nullptr) < 0) {
+          perror("select");
+          break;
+        }
+
+        if (FD_ISSET(game.getSocket(), &rfds)) {
           game.recvmv();
+          king_status m = game.getMode();
+          if (m == win) {
+            cout << "You win!" << endl;
+            break;
+          }
+          if (m == draw) {
+            cout << "Draw." << endl;
+            break;
+          }
           game.draw_board();
-          ord = !ord;
+          my_turn = false;
+          continue;
+        }
+
+        if (FD_ISSET(STDIN_FILENO, &rfds)) {
+          char f[16] = {0}, t[16] = {0};
+          if (!(cin >> f))
+            break;
+
+          if (strcmp(f, "resign") == 0) {
+            cout << "You resigned." << endl;
+            game.sendmv({-1, -1}, {-1, -1});
+            break;
+          }
+          if (!(cin >> t))
+            break;
+
+          int x1, y1, x2, y2;
+          if (!parse_square(f, x1, y1) || !parse_square(t, x2, y2)) {
+            cout << "Invalid coordinates. Use e.g. d2 d4" << endl;
+            continue;
+          }
+          if (!game.make_move({x1, y1}, {x2, y2})) {
+            cout << "Illegal move!" << endl;
+            continue;
+          }
+          game.draw_board();
+          game.sendmv({x1, y1}, {x2, y2});
+          my_turn = false;
         }
       }
+
+      game.CleanUP();
     }
   }
   return 0;
